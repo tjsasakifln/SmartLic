@@ -87,7 +87,7 @@ sentry-sdk[fastapi]==2.68.1
 numpy>=2.4.6,<3.0.0
 scikit-learn>=1.9.0,<1.10.0
 joblib>=1.5.3,<2.0.0
-pandas>=3.0.3,<4.0.0
+pandas>=3.0.5,<4.0.0
 
 # Prometheus metrics exporter (GTM-RESILIENCE-E03)
 prometheus_client>=0.26.0
