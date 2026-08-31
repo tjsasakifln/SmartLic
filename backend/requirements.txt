@@ -76,7 +76,7 @@ resend>=2.30.1,<3.0.0
 PyYAML>=6.0.3,<7.0
 
 # JSON structured logging (STORY-220)
-python-json-logger>=4.1.0,<5.0.0
+python-json-logger>=4.2.0,<5.0.0
 
 # Error tracking (STORY-211)
 # STORY-413: Pinned exactly to block transitive upgrades — open pin was the transport
