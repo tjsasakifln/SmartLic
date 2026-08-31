@@ -115,7 +115,7 @@ arq>=0.28.0,<1.0
 # grpcio, httptools, and other fork-unsafe C extensions via transitive deps.
 # Dockerfile post-install removes any that sneak through anyway.
 opentelemetry-api>=1.41.1,<2.0
-opentelemetry-sdk>=1.41.1,<2.0
+opentelemetry-sdk>=1.44.0,<2.0
 opentelemetry-exporter-otlp-proto-http>=1.41.1,<2.0
 opentelemetry-instrumentation-fastapi>=0.65b0
 opentelemetry-instrumentation-httpx>=0.65b0
