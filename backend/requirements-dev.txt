@@ -16,14 +16,14 @@ pytest-xdist==3.8.0
 faker==37.12.0
 
 # Load testing
-locust==2.46.5
+locust==2.46.6
 
 # Legacy ORM (kept for test backward compat, deprecated in STORY-201)
-sqlalchemy==2.0.52
+sqlalchemy==2.0.54
 psycopg2-binary==2.9.13
 
 # Code quality
-ruff==0.16.7
+ruff==0.16.8
 mypy==1.20.2
 
 # Property-based / fuzz testing (STORY-6.7)

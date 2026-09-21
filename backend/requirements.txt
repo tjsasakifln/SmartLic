@@ -11,7 +11,7 @@ fastapi==0.141.1
 # CRIT-SIGSEGV-v2: uvicorn WITHOUT [standard] extras. uvloop causes intermittent
 # SIGSEGV in production (chardet/hiredis/cryptography C extension interaction).
 # Performance diff is negligible for single-worker uvicorn standalone mode.
-uvicorn==0.52.4
+uvicorn==0.53.0
 gunicorn==23.0.0
 pydantic[email]==2.13.5
 pydantic-settings==2.15.0
@@ -81,7 +81,7 @@ python-json-logger>=4.1.0,<5.0.0
 # Error tracking (STORY-211)
 # STORY-413: Pinned exactly to block transitive upgrades — open pin was the transport
 # for the 2026-04-10 crash loop (StarletteIntegration double-wrap regression).
-sentry-sdk[fastapi]==2.69.1
+sentry-sdk[fastapi]==2.69.2
 
 # SCORE-001 (#1614): ML win probability model — scikit-learn + model serialization
 numpy>=2.4.6,<3.0.0
