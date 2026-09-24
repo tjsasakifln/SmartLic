@@ -1,0 +1,80 @@
+{
+  "applied": false,
+  "campaign": "CONFENGE-SMARTLIC-EQUITY-BRIDGE-CLOSEOUT-01",
+  "canonical_host": "https://confenge.com.br",
+  "config_sha256": "fd391e3667541953e6a830135c863f75452a27c879308fd0012d517740e537a4",
+  "default_status": 410,
+  "dns_mutated": false,
+  "exact_command": "python3 -m bridge.preflight && python3 -m bridge.apply --attach-live-transport",
+  "expected_with_secrets": "PREFLIGHT_OK then APPLY_APPLIED or APPLY_LIVE_CUTOVER_PROVEN_OBSERVATION_STARTED on isolated IPv4 + smartlic.tech CF zone; first live 301 of this hash starts the 28-day window",
+  "expected_without_secrets": "PREFLIGHT_BLOCKED field=BRIDGE_PUBLIC_IPV4 (or the first missing authorized name); APPLY_BLOCKED_SINGLE_EXTERNAL_ACTION applied=false; no Cloudflare write; observation_started_at=null",
+  "forbidden": [
+    "do not invent BRIDGE_PUBLIC_IPV4 / SMARTLIC_ACME_EMAIL / CF_API_TOKEN / CF_ZONE_ID",
+    "do not write confenge.com.br Cloudflare zone",
+    "do not use extra-cli/warmbly 159.195.18.88",
+    "do not revive api.smartlic.tech as an API",
+    "do not restore a SmartLic application runtime or billing"
+  ],
+  "manifesto_sha256": "9e5667c127fc5494f5849aece2234b13a1c1db10257a17274545019634506ca9",
+  "min_allowed_traffic_count": 1,
+  "min_vars": [
+    "BRIDGE_PUBLIC_IPV4",
+    "SMARTLIC_ACME_EMAIL",
+    "CF_API_TOKEN",
+    "CF_ZONE_ID"
+  ],
+  "missing": [
+    "BRIDGE_PUBLIC_IPV4",
+    "SMARTLIC_ACME_EMAIL",
+    "CF_API_TOKEN",
+    "CF_ZONE_ID"
+  ],
+  "nominal_error": "BLOCKED_SINGLE_EXTERNAL_ACTION",
+  "observation": {
+    "chain": false,
+    "config_sha256": "fd391e3667541953e6a830135c863f75452a27c879308fd0012d517740e537a4",
+    "first_production_301_timestamp": null,
+    "http_status": null,
+    "loop": false,
+    "min_allowed_traffic_count": 1,
+    "observation_days_elapsed": 0,
+    "removal": "HOLD_WINDOW_NOT_STARTED",
+    "removal_trigger": "Remove smartlic.tech bridge only after: 28-day observation of this hash, zero residual priority 404/5xx/chain, critical backlinks (if any become known) point at CONFENGE or are accepted as retired, and SmartLic#2111 archive gate.",
+    "target": "https://confenge.com.br",
+    "traffic_count": 0
+  },
+  "observation_started": false,
+  "observation_window_days": 28,
+  "pinned_commit": "8a2f4d5bce7e23d0308246ed45ed4d58752984ac",
+  "post_apply_smokes": [
+    {
+      "command": "curl -sI https://smartlic.tech/glossario/reajuste",
+      "expect": "HTTP 301 Location: https://confenge.com.br/reequilibrio-obras-publicas/ X-Bridge-Config-Hash: fd391e3667541953e6a830135c863f75452a27c879308fd0012d517740e537a4"
+    },
+    {
+      "command": "curl -sI https://smartlic.tech/login",
+      "expect": "HTTP 410 and no Location"
+    },
+    {
+      "command": "curl -sI https://smartlic.tech/",
+      "expect": "HTTP 410 and no Location (no blanket home redirect)"
+    },
+    {
+      "command": "curl -sI https://www.smartlic.tech/glossario/reajuste",
+      "expect": "HTTP 301 Location: https://confenge.com.br/reequilibrio-obras-publicas/ (same hash)"
+    },
+    {
+      "command": "python3 -m bridge.monitor --out window-daily.json",
+      "expect": "MONITOR_OK; does not start observation_started_at"
+    }
+  ],
+  "redirects": 11,
+  "rollback": [
+    "python3 -m bridge.generate --rollback",
+    "DNS baseline (does not start SmartLic): apex A 69.46.46.88 TTL 60; delete www A; recreate www CNAME app.smartlic.tech. TTL 300 proxied=false"
+  ],
+  "single_human_action": "Write /etc/smartlic-bridge/env (mode 0640) on an isolated public IPv4 host that is not 159.195.18.88 (extra-cli/warmbly prod) with BRIDGE_PUBLIC_IPV4=<that isolated IPv4> and SMARTLIC_ACME_EMAIL=<ops contact>, export CF_API_TOKEN and CF_ZONE_ID for zone smartlic.tech (never confenge.com.br) in the apply shell, then re-run `python3 -m bridge.apply`.",
+  "status": "BLOCKED_SINGLE_EXTERNAL_ACTION",
+  "tls_mutated": false,
+  "verdict": "BRIDGE_CODE_COMPLETE_EXTERNAL_ACTION_REQUIRED"
+}

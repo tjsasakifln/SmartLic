@@ -19,7 +19,11 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable, Iterable, Mapping
 
-from bridge.pins import OBSERVATION_WINDOW_DAYS
+from bridge.pins import (
+    MIN_ALLOWED_TRAFFIC_COUNT,
+    OBSERVATION_WINDOW_DAYS,
+    PINNED_CANONICAL_HOST,
+)
 from bridge.policy import Decision, normalize_path
 
 RETENTION_DAYS = 35  # 28-day window + 7 days; then delete.
@@ -191,9 +195,16 @@ def evaluate_signals(
     errors = int(counts.get("errors") or 0)
     status_5xx = int(counts.get("5xx") or 0)
     chain_gt1 = int(counts.get("chain_gt1") or 0)
+    loop_count = int(counts.get("loop") or 0)
     target_status = str((summary.get("target_health") or {}).get("status") or "UNOBSERVED")
     target_fail = target_status == "FAIL"
-    residual_priority = unexpected_404 > 0 or status_5xx > 0 or errors > 0 or chain_gt1 > 0
+    residual_priority = (
+        unexpected_404 > 0
+        or status_5xx > 0
+        or errors > 0
+        or chain_gt1 > 0
+        or loop_count > 0
+    )
 
     prod = production_first_301 or {}
     config_hash = str(summary.get("config_sha256") or "")
@@ -203,20 +214,31 @@ def evaluate_signals(
         and bool(config_hash)
     )
     window_elapsed = False
-    if window_started and prod.get("captured_at"):
+    observation_days_elapsed = 0
+    started_raw = prod.get("observation_started_at") or prod.get("captured_at")
+    if window_started and started_raw:
         try:
-            started = datetime.fromisoformat(str(prod["captured_at"]).replace("Z", "+00:00"))
+            started = datetime.fromisoformat(str(started_raw).replace("Z", "+00:00"))
             moment = now or utc_now()
+            delta = moment - started
+            observation_days_elapsed = max(0, int(delta.days))
             window_elapsed = moment >= started + timedelta(days=WINDOW_DAYS)
         except ValueError:
             window_elapsed = False
+            observation_days_elapsed = 0
+
+    traffic_count = int(counts.get("301") or 0)
+    if window_started:
+        # The authorizing production 301 itself satisfies the minimum.
+        traffic_count = max(traffic_count, MIN_ALLOWED_TRAFFIC_COUNT)
+    min_allowed = MIN_ALLOWED_TRAFFIC_COUNT
 
     rollback = residual_priority or target_fail
     if not window_started:
         removal = "HOLD_WINDOW_NOT_STARTED"
     elif residual_priority or target_fail:
         removal = "HOLD_RESIDUAL"
-    elif not window_elapsed:
+    elif not window_elapsed or traffic_count < min_allowed:
         removal = "WAIT_WINDOW"
     else:
         removal = "READY_FOR_REVIEW"
@@ -224,15 +246,52 @@ def evaluate_signals(
     return {
         "window_started": window_started,
         "window_elapsed": window_elapsed,
+        "observation_days_elapsed": observation_days_elapsed,
+        "min_allowed_traffic_count": min_allowed,
+        "traffic_count": traffic_count,
         "residual_priority": residual_priority,
         "unexpected_404": unexpected_404,
         "errors": errors,
         "status_5xx": status_5xx,
         "chain_gt1": chain_gt1,
+        "chain": chain_gt1 > 0,
+        "loop": loop_count > 0,
+        "target": PINNED_CANONICAL_HOST,
         "target_health_fail": target_fail,
         "rollback": rollback,
         "removal": removal,
         "first_301_scope": "production" if window_started else "process-local",
+    }
+
+
+def observation_exit_fields(
+    signals: Mapping[str, Any],
+    *,
+    production_first_301: Mapping[str, Any] | None = None,
+    removal_trigger: str = "",
+    config_sha256: str = "",
+) -> dict[str, Any]:
+    """Stable observation/exit record. Does not start the window."""
+    prod = production_first_301 or {}
+    started = prod.get("observation_started_at") or prod.get("captured_at")
+    http_status = prod.get("http_status")
+    if http_status is None:
+        raw_status = prod.get("status")
+        http_status = raw_status if isinstance(raw_status, int) else None
+    return {
+        "config_sha256": config_sha256 or str(prod.get("config_sha256") or ""),
+        "first_production_301_timestamp": started if signals.get("window_started") else None,
+        "http_status": http_status if signals.get("window_started") else None,
+        "chain": bool(signals.get("chain")),
+        "loop": bool(signals.get("loop")),
+        "target": str(signals.get("target") or PINNED_CANONICAL_HOST),
+        "min_allowed_traffic_count": int(
+            signals.get("min_allowed_traffic_count") or MIN_ALLOWED_TRAFFIC_COUNT
+        ),
+        "traffic_count": int(signals.get("traffic_count") or 0),
+        "observation_days_elapsed": int(signals.get("observation_days_elapsed") or 0),
+        "removal": str(signals.get("removal") or "HOLD_WINDOW_NOT_STARTED"),
+        "removal_trigger": removal_trigger,
     }
 
 

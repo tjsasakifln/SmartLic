@@ -70,6 +70,8 @@ PII_QUERY_KEYS = frozenset(
 DEFAULT_STATUS = 410
 REDIRECT_STATUS = 301
 OBSERVATION_WINDOW_DAYS = 28
+# Exit cannot fire on zero production 301s of this hash (the first live 301 counts as 1).
+MIN_ALLOWED_TRAFFIC_COUNT = 1
 BRIDGE_OWNER = "SmartLic#2115"
 COST = "UNKNOWN"
 

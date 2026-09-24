@@ -594,6 +594,8 @@ def probe_targets(compiled: CompiledMap, timeout: float = 15.0) -> None:
             errors.append(f"{rule.path} → {rule.target_url} status={status}")
         if host != TARGET_HOSTNAME:
             errors.append(f"{rule.path} hop/host inesperado: {final}")
+        if status == 200 and host == TARGET_HOSTNAME:
+            print(f"PROBE_OK path={rule.path} target={rule.target_url} status={status}")
     if errors:
         raise ManifestError("destino ready indisponível:\n- " + "\n- ".join(errors))
 

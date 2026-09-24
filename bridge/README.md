@@ -21,7 +21,10 @@ python3 -m bridge.generate
 python3 -m unittest discover -s bridge/tests -v
 python3 -m bridge.serve --host 127.0.0.1 --port 8765
 python3 -m bridge.observe --records window.jsonl --export window-export.json
-python3 -m bridge.preflight   # hard gate before any owner DNS/TLS apply
+python3 -m bridge.preflight && python3 -m bridge.apply --attach-live-transport
+python3 -m bridge.monitor --out window-daily.json
 ```
+
+Owner one-shot (no code edit): `docs/campaigns/CONFENGE-SMARTLIC-EQUITY-BRIDGE-CLOSEOUT-01/OPERATOR_ONE_SHOT.txt`.
 
 Docs: `docs/CUTOVER.md`, `docs/CUTOVER_READINESS.md`, `docs/RUNBOOK.md`, `docs/ROLLBACK.md`, `docs/OBSERVABILITY.md`.

@@ -25,6 +25,7 @@ import sys
 import tempfile
 import time
 from dataclasses import asdict, dataclass, field
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Mapping
 from urllib.parse import urlsplit
@@ -43,6 +44,7 @@ from bridge.generate import (
 from bridge.pins import (
     FORBIDDEN_GENERIC_TARGETS,
     FORBIDDEN_TARGET_PATHS,
+    OBSERVATION_WINDOW_DAYS,
     PINNED_CANONICAL_HOST,
     PINNED_COMMIT,
     PINNED_CONFIG_SHA256,
@@ -637,6 +639,70 @@ def register_first_production_301(
         detail=f"live {host}{probe.path} → {location}",
         written=written,
     )
+
+
+def _parse_probe_time(raw: str | None, fallback: datetime) -> datetime:
+    if not raw:
+        return fallback
+    try:
+        return datetime.fromisoformat(str(raw).replace("Z", "+00:00")).astimezone(timezone.utc)
+    except ValueError:
+        return fallback
+
+
+def start_observation_window(
+    probe: ProductionProbe | None,
+    compiled: CompiledMap | None,
+    *,
+    write_path: Path | None = None,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Persist the 28-day window only from a real production 301 probe.
+
+    Loopback/fixture/mock probes cannot set observation_started_at.
+    """
+    moment = now or datetime.now(timezone.utc)
+    record = register_first_production_301(probe, compiled)
+    if record.status != "OBSERVED" or compiled is None or probe is None:
+        payload = {
+            "status": record.status,
+            "field": record.field,
+            "detail": record.detail,
+            "first_production_301": record.status,
+            "observation_started_at": None,
+            "observation_end": None,
+            "config_sha256": None,
+            "manifesto_sha256": None,
+            "written": False,
+        }
+        return payload
+    started = _parse_probe_time(probe.captured_at, moment)
+    ended = started + timedelta(days=OBSERVATION_WINDOW_DAYS)
+    payload = {
+        "status": "OBSERVED",
+        "field": "first-production-301",
+        "detail": record.detail,
+        "first_production_301": "OBSERVED",
+        "observation_started_at": started.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "observation_end": ended.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "captured_at": started.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "config_sha256": probe.config_hash,
+        "manifesto_sha256": compiled.manifesto_sha256,
+        "host": (probe.host or "").split(":", 1)[0].lower(),
+        "path": probe.path,
+        "http_status": probe.status,
+        "location": probe.location,
+        "source": probe.source,
+        "written": False,
+    }
+    if write_path is not None:
+        write_path.parent.mkdir(parents=True, exist_ok=True)
+        write_path.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        payload["written"] = True
+    return payload
 
 
 def _free_port() -> int:
