@@ -1,0 +1,22 @@
+{
+  "campaign": "CONFENGE-PRODUCTION-CLOSEOUT-01",
+  "repo": "tjsasakifln/SmartLic",
+  "approval": "OWNER_CONDITIONAL_PREAPPROVAL_CONFENGE_PRODUCTION_CLOSEOUT_01",
+  "as_of": "2026-08-17T12:41:00Z",
+  "origin_main": "fa939a18c226b7c6046aa5dcf024780f0b717140",
+  "dns_apex": "NO_A",
+  "bridge_public_ipv4": "AUSENTE",
+  "acme_email": "AUSENTE",
+  "cutover": "NOT_AUTHORIZED",
+  "issues_keep_open": [
+    2115,
+    2111
+  ],
+  "preflight": "BLOCKED",
+  "preflight_field": "BRIDGE_PUBLIC_IPV4",
+  "dns_mutated": false,
+  "blackbox": "PASS",
+  "destinations_live": "PASS",
+  "first_production_301": "UNOBSERVED",
+  "domain": "smartlic.tech"
+}
