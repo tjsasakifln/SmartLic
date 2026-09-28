@@ -11,7 +11,7 @@ fastapi==0.141.1
 # CRIT-SIGSEGV-v2: uvicorn WITHOUT [standard] extras. uvloop causes intermittent
 # SIGSEGV in production (chardet/hiredis/cryptography C extension interaction).
 # Performance diff is negligible for single-worker uvicorn standalone mode.
-uvicorn==0.53.0
+uvicorn==0.54.0
 gunicorn==23.0.0
 pydantic[email]==2.13.5
 pydantic-settings==2.15.0
@@ -49,13 +49,13 @@ redis==5.3.1  # Feature flag caching (STORY-171)
 # sqlalchemy and psycopg2-binary moved to requirements-dev.txt (STORY-201)
 # Kept in database.py for test backward compat only
 # extra-cli public_read_v1 consumer (#2108) — server-side only, never in the browser.
-psycopg[binary]==3.3.5
+psycopg[binary]==3.3.6
 
 # Google Sheets API integration (STORY-180)
 # ACTIVE: Used in oauth.py, google_sheets.py, routes/export_sheets.py
 # Provides: Google OAuth login + export search results to Google Sheets
 google-api-python-client==2.200.0  # Google Sheets API client
-google-auth==2.58.0                # OAuth 2.0 authentication
+google-auth==2.58.1                # OAuth 2.0 authentication
 google-auth-oauthlib==1.4.1        # OAuth flow helpers
 google-auth-httplib2==0.4.2        # HTTP transport for Google APIs
 # cryptography 50.x: PYSEC-2026-3552 (CVE-2026-69247, needs 50.0.0),
@@ -81,7 +81,7 @@ python-json-logger>=4.1.0,<5.0.0
 # Error tracking (STORY-211)
 # STORY-413: Pinned exactly to block transitive upgrades — open pin was the transport
 # for the 2026-04-10 crash loop (StarletteIntegration double-wrap regression).
-sentry-sdk[fastapi]==2.69.2
+sentry-sdk[fastapi]==2.70.0
 
 # SCORE-001 (#1614): ML win probability model — scikit-learn + model serialization
 numpy>=2.4.6,<3.0.0

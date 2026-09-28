@@ -19,11 +19,11 @@ faker==37.12.0
 locust==2.46.6
 
 # Legacy ORM (kept for test backward compat, deprecated in STORY-201)
-sqlalchemy==2.0.54
+sqlalchemy==2.1.0
 psycopg2-binary==2.9.13
 
 # Code quality
-ruff==0.16.8
+ruff==0.16.9
 mypy==1.20.2
 
 # Property-based / fuzz testing (STORY-6.7)
