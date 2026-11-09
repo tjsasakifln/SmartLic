@@ -10,20 +10,20 @@
 pytest==8.4.2
 pytest-asyncio==0.26.0
 pytest-cov==6.3.0
-pytest-benchmark==5.3.0
+pytest-benchmark==5.3.1
 pytest-timeout==2.4.0
 pytest-xdist==3.8.0
 faker==37.12.0
 
 # Load testing
-locust==2.46.6
+locust==2.47.0
 
 # Legacy ORM (kept for test backward compat, deprecated in STORY-201)
-sqlalchemy==2.0.54
+sqlalchemy==2.1.8
 psycopg2-binary==2.9.13
 
 # Code quality
-ruff==0.16.8
+ruff==0.17.4
 mypy==1.20.2
 
 # Property-based / fuzz testing (STORY-6.7)
